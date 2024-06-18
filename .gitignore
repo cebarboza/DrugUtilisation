@@ -4,3 +4,6 @@ docs
 inst/doc
 /doc/
 /Meta/
+.Rprofile
+renv
+renv.lock
