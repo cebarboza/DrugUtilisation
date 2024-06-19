@@ -437,12 +437,16 @@ addCumulativeDose <- function(cohort,
     # add the type of subexposure
     cohortInfo <- addTypeSubexposure(cohortInfo, gapEra)
 
-    # solve same index day overlapping
-    cohortInfo <- solveSameIndexOverlap(cohortInfo, cdm, sameIndexMode)
+    # Only check for overlap if there are more than one row
+    numRows <- cohortInfo %>% dplyr::n()
 
-    # solve not same index overlapping
-    cohortInfo <- solveOverlap(cohortInfo, cdm, overlapMode)
+    if (numRows > 1) {
+      # solve same index day overlapping
+      cohortInfo <- solveSameIndexOverlap(cohortInfo, cdm, sameIndexMode)
 
+      # solve not same index overlapping
+      cohortInfo <- solveOverlap(cohortInfo, cdm, overlapMode)
+    }
     # add daily dose to gaps
     cohortInfo <- addGapDailyDose(cohortInfo, cdm, eraJoinMode)
 
@@ -681,7 +685,7 @@ solveSameIndexOverlap <- function(x, cdm, sameIndexMode) {
       .data$subject_id, .data$cohort_start_date, .data$cohort_end_date,
       .data$subexposure_id, .data$drug_exposure_start_date, .data$unit
     ) %>%
-    dplyr::filter(dplyr::n() >= 1)
+    dplyr::filter(dplyr::n() > 1)
   if (sameIndexMode == "minimum") {
     x_same_index <- x_same_index %>%
       dplyr::left_join(
@@ -751,7 +755,7 @@ solveOverlap <- function(x, cdm, overlapMode) {
       is.na(.data$considered_subexposure) |
         .data$considered_subexposure == "yes"
     ) %>%
-    dplyr::filter(dplyr::n() >= 1)
+    dplyr::filter(dplyr::n() > 1)
   if (
     x_overlap %>% dplyr::ungroup() %>% dplyr::tally() %>% dplyr::pull("n") > 0
   ) {
