@@ -438,7 +438,7 @@ addCumulativeDose <- function(cohort,
     cohortInfo <- addTypeSubexposure(cohortInfo, gapEra)
 
     # Only check for overlap if there are more than one row
-    numRows <- cohortInfo %>% dplyr::n()
+    numRows <- cohortInfo %>% summarise(n = n()) %>% pull(n)
 
     if (numRows > 1) {
       # solve same index day overlapping
